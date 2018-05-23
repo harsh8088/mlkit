@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.harsh.ml_kit">
+
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.firebase.ml.vision.DEPENDENCIES"
+            android:value="face" />
+
+        <activity android:name=".activity.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.TextDetectionActivity"
+            android:label="Text Detection" />
+        <activity
+            android:name=".activity.LandMarkDetectionActivity"
+            android:label="Label Detection" />
+        <activity
+            android:name=".activity.BarCodeDetectionActivity"
+            android:label="BarCode Detection" />
+        <activity
+            android:name=".activity.ImageLabelingActivity"
+            android:label="Image Labeling" />
+        <activity
+            android:name=".activity.FaceDetectionActivity"
+            android:label="Face Detection" />
+
+    </application>
+
+</manifest>
