@@ -13,10 +13,7 @@ package com.example.harsh.ml_kit.activity;// Copyright 2018 Google LLC
 // limitations under the License.
 
 
-import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,42 +21,32 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Pair;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.harsh.ml_kit.R;
-import com.example.harsh.ml_kit.util.CloudTextGraphic;
+import com.example.harsh.ml_kit.util.BitmapUtils;
 import com.example.harsh.ml_kit.util.GraphicOverlay;
+import com.example.harsh.ml_kit.util.ImagePickerUtil;
 import com.example.harsh.ml_kit.util.TextGraphic;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.ml.vision.FirebaseVision;
-import com.google.firebase.ml.vision.cloud.FirebaseVisionCloudDetectorOptions;
-import com.google.firebase.ml.vision.cloud.text.FirebaseVisionCloudDocumentTextDetector;
-import com.google.firebase.ml.vision.cloud.text.FirebaseVisionCloudText;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextDetector;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
-public class TextDetectionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class TextDetectionActivity extends AppCompatActivity {
     private static final String TAG = "TextDetectionActivity";
     private ImageView mImageView;
-    private Button mButton;
-    private Button mCloudButton;
-    private Bitmap mSelectedImage;
     private GraphicOverlay mGraphicOverlay;
     // Max width (portrait mode)
     private Integer mImageMaxWidth;
     // Max height (portrait mode)
     private Integer mImageMaxHeight;
+    private String filePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,43 +54,42 @@ public class TextDetectionActivity extends AppCompatActivity implements AdapterV
         setContentView(R.layout.activity_text_detection);
 
         mImageView = findViewById(R.id.image_view);
+        mImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ImagePickerUtil.add(getSupportFragmentManager(), new ImagePickerUtil.OnImagePickerListener() {
+                    @Override
+                    public void success(String name, String path) {
+                        filePath = path.replace("file:///", "");
+                        Bitmap bitmap;
+                        bitmap = BitmapUtils.decodeSampledBitmapFromFile(filePath, 500, 600);
+                        mImageView.setImageBitmap(bitmap);
+                        runTextRecognition(bitmap);
+                    }
 
-        mButton = findViewById(R.id.button_text);
-        mCloudButton = findViewById(R.id.button_cloud_text);
+                    @Override
+                    public void fail(String message) {
+                        Toast.makeText(TextDetectionActivity.this, message, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }
+        });
 
         mGraphicOverlay = findViewById(R.id.graphic_overlay);
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                runTextRecognition();
-            }
-        });
-        mCloudButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                runCloudTextRecognition();
-            }
-        });
-        Spinner dropdown = findViewById(R.id.spinner);
-        String[] items = new String[]{"Image 1", "Image 2", "Image 3","Image 4","Image 5"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout
-                .simple_spinner_dropdown_item, items);
-        dropdown.setAdapter(adapter);
-        dropdown.setOnItemSelectedListener(this);
+
     }
 
-    private void runTextRecognition() {
-        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(mSelectedImage);
+    private void runTextRecognition(Bitmap bitmap) {
+        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
         FirebaseVisionTextDetector detector = FirebaseVision.getInstance()
                 .getVisionTextDetector();
-        mButton.setEnabled(false);
         detector.detectInImage(image)
                 .addOnSuccessListener(
                         new OnSuccessListener<FirebaseVisionText>() {
                             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                             @Override
                             public void onSuccess(FirebaseVisionText texts) {
-                                mButton.setEnabled(true);
                                 processTextRecognitionResult(texts);
                             }
                         })
@@ -112,7 +98,6 @@ public class TextDetectionActivity extends AppCompatActivity implements AdapterV
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 // Task failed with an exception
-                                mButton.setEnabled(true);
                                 e.printStackTrace();
                             }
                         });
@@ -139,63 +124,6 @@ public class TextDetectionActivity extends AppCompatActivity implements AdapterV
         }
     }
 
-    private void runCloudTextRecognition() {
-        FirebaseVisionCloudDetectorOptions options =
-                new FirebaseVisionCloudDetectorOptions.Builder()
-                        .setModelType(FirebaseVisionCloudDetectorOptions.LATEST_MODEL)
-                        .setMaxResults(15)
-                        .build();
-        mCloudButton.setEnabled(false);
-        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(mSelectedImage);
-        FirebaseVisionCloudDocumentTextDetector detector = FirebaseVision.getInstance()
-                .getVisionCloudDocumentTextDetector(options);
-        detector.detectInImage(image)
-                .addOnSuccessListener(
-                        new OnSuccessListener<FirebaseVisionCloudText>() {
-                            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-                            @Override
-                            public void onSuccess(FirebaseVisionCloudText texts) {
-                                mCloudButton.setEnabled(true);
-                                processCloudTextRecognitionResult(texts);
-                            }
-                        })
-                .addOnFailureListener(
-                        new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                // Task failed with an exception
-                                mCloudButton.setEnabled(true);
-                                e.printStackTrace();
-                            }
-                        });
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void processCloudTextRecognitionResult(FirebaseVisionCloudText text) {
-        // Task completed successfully
-        if (text == null) {
-            showToast("No text found");
-            return;
-        }
-        mGraphicOverlay.clear();
-        List<FirebaseVisionCloudText.Page> pages = text.getPages();
-        for (int i = 0; i < pages.size(); i++) {
-            FirebaseVisionCloudText.Page page = pages.get(i);
-            List<FirebaseVisionCloudText.Block> blocks = page.getBlocks();
-            for (int j = 0; j < blocks.size(); j++) {
-                List<FirebaseVisionCloudText.Paragraph> paragraphs = blocks.get(j).getParagraphs();
-                for (int k = 0; k < paragraphs.size(); k++) {
-                    FirebaseVisionCloudText.Paragraph paragraph = paragraphs.get(k);
-                    List<FirebaseVisionCloudText.Word> words = paragraph.getWords();
-                    for (int l = 0; l < words.size(); l++) {
-                        GraphicOverlay.Graphic cloudTextGraphic = new CloudTextGraphic(mGraphicOverlay, words
-                                .get(l));
-                        mGraphicOverlay.add(cloudTextGraphic);
-                    }
-                }
-            }
-        }
-    }
 
     private void showToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
@@ -243,74 +171,4 @@ public class TextDetectionActivity extends AppCompatActivity implements AdapterV
         return new Pair<>(targetWidth, targetHeight);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
-        mGraphicOverlay.clear();
-        switch (position) {
-            case 0:
-                mSelectedImage = getBitmapFromAsset(this, "images01.png");
-
-                break;
-            case 1:
-                // Whatever you want to happen when the second item gets selected
-                mSelectedImage = getBitmapFromAsset(this, "images02.jpeg");
-                break;
-            case 2:
-                // Whatever you want to happen when the thrid item gets selected
-                mSelectedImage = getBitmapFromAsset(this, "images03.jpeg");
-                break;
-            case 3:
-                // Whatever you want to happen when the thrid item gets selected
-                mSelectedImage = getBitmapFromAsset(this, "images04.jpeg");
-                break;
-            case 4:
-                // Whatever you want to happen when the thrid item gets selected
-                mSelectedImage = getBitmapFromAsset(this, "images05.jpeg");
-                break;
-
-        }
-        if (mSelectedImage != null) {
-            // Get the dimensions of the View
-            Pair<Integer, Integer> targetedSize = getTargetedWidthHeight();
-
-            int targetWidth = targetedSize.first;
-            int maxHeight = targetedSize.second;
-
-            // Determine how much to scale down the image
-            float scaleFactor =
-                    Math.max(
-                            (float) mSelectedImage.getWidth() / (float) targetWidth,
-                            (float) mSelectedImage.getHeight() / (float) maxHeight);
-
-            Bitmap resizedBitmap =
-                    Bitmap.createScaledBitmap(
-                            mSelectedImage,
-                            (int) (mSelectedImage.getWidth() / scaleFactor),
-                            (int) (mSelectedImage.getHeight() / scaleFactor),
-                            true);
-
-            mImageView.setImageBitmap(resizedBitmap);
-            mSelectedImage = resizedBitmap;
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-        // Do nothing
-    }
-
-    public static Bitmap getBitmapFromAsset(Context context, String filePath) {
-        AssetManager assetManager = context.getAssets();
-
-        InputStream is;
-        Bitmap bitmap = null;
-        try {
-            is = assetManager.open(filePath);
-            bitmap = BitmapFactory.decodeStream(is);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return bitmap;
-    }
 }

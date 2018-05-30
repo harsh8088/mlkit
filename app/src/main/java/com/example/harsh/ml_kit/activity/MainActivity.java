@@ -20,7 +20,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
-
     private static final int PERMISSION_REQUESTS = 1;
 
 
@@ -93,12 +92,11 @@ public class MainActivity extends AppCompatActivity {
                 intent = new Intent(MainActivity.this, TextDetectionActivity.class);
                 break;
             case R.id.btn_barcode_detection:
-//                intent = new Intent(MainActivity.this, BarCodeDetectionActivity.class);
-                Toast.makeText(MainActivity.this, "coming soon!!!", Toast.LENGTH_SHORT).show();
+//                intent = new Intent(MainActivity.this, BarCodeActivity.class);
+                intent = new Intent(MainActivity.this, BarCodeDetectionActivity.class);
                 break;
             case R.id.btn_image_labeling:
-//                intent = new Intent(MainActivity.this, ImageLabelingActivity.class);
-                Toast.makeText(MainActivity.this, "coming soon!!!", Toast.LENGTH_SHORT).show();
+                intent = new Intent(MainActivity.this, ImageLabelingActivity.class);
                 break;
             case R.id.btn_face_detection:
                 intent = new Intent(MainActivity.this, FaceDetectionActivity.class);
