@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:gravity="center"
+    android:orientation="vertical"
     tools:context=".activity.BarCodeDetectionActivity">
 
     <ImageView
@@ -15,12 +15,13 @@
         android:minHeight="50dp"
         android:minWidth="50dp"
         android:src="@android:drawable/ic_input_add" />
+
     <TextView
         android:id="@+id/text_result"
-        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:gravity="center"
-        android:text="Results"/>
+        android:text="@string/results" />
 
 </LinearLayout>

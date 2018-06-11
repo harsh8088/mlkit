@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">ML-Kit</string>
+    <string name="results">Results</string>
+    <string name="text_detection">Text Detection</string>
+    <string name="barcode_detection">BarCode Detection</string>
+    <string name="image_labeling">Image Labeling</string>
+    <string name="face_detection">Face Detection</string>
+    <string name="landmark_detection">LandMark Detection</string>
 </resources>
