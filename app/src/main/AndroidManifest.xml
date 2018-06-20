@@ -32,13 +32,7 @@
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
             android:value="face,barcode" />
 
-        <activity android:name=".activity.MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".activity.MainActivity"></activity>
         <activity
             android:name=".activity.TextDetectionActivity"
             android:label="Text Detection" />
@@ -54,8 +48,17 @@
         <activity
             android:name=".activity.FaceDetectionActivity"
             android:label="Face Detection" />
-        <activity android:name=".activity.BarCodeActivity"
-            android:label="BarCode Detection"/>
+        <activity
+            android:name=".activity.BarCodeActivity"
+            android:label="BarCode Detection" />
+        <activity android:name=".extra.OrderGuidesActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".extra.DeliveryDaysActivity"></activity>
     </application>
 
 </manifest>
